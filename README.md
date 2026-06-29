@@ -47,7 +47,7 @@ El grupo de WhatsApp "TIE UPA" se utiliza para publicar libros en venta, pero lo
 - Editar cualquier oferta / cambiar estado a BLOQUEADO
 - Asignar nueva contraseña a un usuario
 
-<img width="367" height="708" alt="image" src="https://github.com/user-attachments/assets/f6a64ae7-6f69-4357-80ec-9da651b86729" />
+<img width="766" height="721" alt="image" src="https://github.com/user-attachments/assets/7417ab3e-0d4e-4de3-9d35-abd0c9539cea" />
 
 ---
 
