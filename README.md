@@ -47,6 +47,8 @@ El grupo de WhatsApp "TIE UPA" se utiliza para publicar libros en venta, pero lo
 - Editar cualquier oferta / cambiar estado a BLOQUEADO
 - Asignar nueva contraseña a un usuario
 
+<img width="367" height="708" alt="image" src="https://github.com/user-attachments/assets/f6a64ae7-6f69-4357-80ec-9da651b86729" />
+
 ---
 
 ## Estados
@@ -60,9 +62,3 @@ El grupo de WhatsApp "TIE UPA" se utiliza para publicar libros en venta, pero lo
 ## Diagrama ER
 
 <img width="720" height="681" alt="Screenshot 2026-06-29 at 10-43-38 Java Swing mit SQL-Datenbanken - Claude" src="https://github.com/user-attachments/assets/699f9e40-6532-47e3-b005-03fba45cd4e9" />
-
-
----
-
-
-| fk_usuario | INTEGER FK | → usuario.id |
