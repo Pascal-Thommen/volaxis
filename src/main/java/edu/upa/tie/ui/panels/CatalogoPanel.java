@@ -27,7 +27,7 @@ public class CatalogoPanel extends JPanel implements MainFrame.Refreshable {
     private final JPanel pages = new JPanel(pagesLayout);
 
     private final JPanel booksPage = new JPanel(new BorderLayout(0, 12));
-    private final JPanel bookGrid = new JPanel(new GridLayout(0, 3, 12, 12));
+    private final JPanel bookGrid = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 12));
     private final JScrollPane bookScroll = new JScrollPane(bookGrid);
 
     private final JPanel offersPage = new JPanel(new BorderLayout(0, 12));
@@ -154,9 +154,6 @@ public class CatalogoPanel extends JPanel implements MainFrame.Refreshable {
             bookGrid.add(emptyLabel("No hay libros con ofertas visibles."));
         }
 
-        int columns = 3;
-        int rows = Math.max(1, (libros.size() + columns - 1) / columns);
-        bookGrid.setLayout(new GridLayout(rows, columns, 12, 12));
         bookGrid.revalidate();
         bookGrid.repaint();
     }
@@ -257,9 +254,28 @@ public class CatalogoPanel extends JPanel implements MainFrame.Refreshable {
         if (currentOfertas.isEmpty()) {
             offersListPanel.add(emptyLabel("No hay ofertas visibles para este libro."));
         } else {
+            List<Oferta> disponibles = new ArrayList<>();
+            List<Oferta> reservadas = new ArrayList<>();
             for (Oferta oferta : currentOfertas) {
+                if ("Reservado".equalsIgnoreCase(oferta.getEstado())) {
+                    reservadas.add(oferta);
+                } else {
+                    disponibles.add(oferta);
+                }
+            }
+            for (Oferta oferta : disponibles) {
                 offersListPanel.add(buildOfferLine(oferta));
                 offersListPanel.add(Box.createVerticalStrut(10));
+            }
+            if (!reservadas.isEmpty()) {
+                offersListPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+                offersListPanel.add(Box.createVerticalStrut(10));
+                offersListPanel.add(new JLabel("Reservadas"));
+                offersListPanel.add(Box.createVerticalStrut(10));
+                for (Oferta oferta : reservadas) {
+                    offersListPanel.add(buildOfferLine(oferta));
+                    offersListPanel.add(Box.createVerticalStrut(10));
+                }
             }
         }
 
@@ -268,20 +284,24 @@ public class CatalogoPanel extends JPanel implements MainFrame.Refreshable {
     }
 
     private JPanel buildOfferLine(Oferta oferta) {
+        boolean reservado = "Reservado".equalsIgnoreCase(oferta.getEstado());
         JPanel line = new JPanel(new BorderLayout(10, 10));
         line.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(220, 220, 240), 1, true),
             new EmptyBorder(12, 12, 12, 12)
         ));
-        line.setBackground("Reservado".equalsIgnoreCase(oferta.getEstado()) ? new Color(245, 245, 245) : Color.WHITE);
+        line.setBackground(reservado ? new Color(245, 245, 245) : Color.WHITE);
 
         JLabel info = new JLabel(String.format("<html><b>Precio:</b> %.0f<br/><b>Condición:</b> %s<br/><b>Estado:</b> %s<br/><b>Vendedor:</b> %s</html>",
             oferta.getPrecio(), oferta.getCondicion(), oferta.getEstado(), oferta.getUsuarioNombre()));
         info.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        info.setForeground(new Color(50, 45, 100));
+        info.setForeground(reservado ? new Color(110, 110, 130) : new Color(50, 45, 100));
 
         JButton detailsBtn = accentButton("Ver detalles");
         detailsBtn.addActionListener(e -> openOfferPopup(oferta));
+        if (reservado) {
+            detailsBtn.setBackground(new Color(170, 170, 180));
+        }
 
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         right.setOpaque(false);
@@ -289,6 +309,13 @@ public class CatalogoPanel extends JPanel implements MainFrame.Refreshable {
 
         line.add(info, BorderLayout.CENTER);
         line.add(right, BorderLayout.EAST);
+
+        line.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                openOfferPopup(oferta);
+            }
+        });
 
         return line;
     }
