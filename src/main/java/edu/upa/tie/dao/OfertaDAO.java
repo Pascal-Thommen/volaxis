@@ -54,6 +54,93 @@ public class OfertaDAO {
         return list;
     }
 
+    public List<Oferta> getVisibleOffers(String estadoFiltro, String condicionFiltro, String orden) {
+        List<Oferta> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(SELECT_FULL);
+        List<String> where = new ArrayList<>();
+        where.add("e.estado != 'Vendido'");
+
+        if (estadoFiltro != null && !"Todos".equals(estadoFiltro)) {
+            where.add("e.estado = ?");
+        }
+        if (condicionFiltro != null && !"Todas".equals(condicionFiltro)) {
+            where.add("c.condicion = ?");
+        }
+
+        if (!where.isEmpty()) {
+            sql.append("WHERE ").append(String.join(" AND ", where));
+        }
+
+        sql.append(" ORDER BY ");
+        if ("Precio ↓".equals(orden)) {
+            sql.append("o.precio DESC");
+        } else if ("Precio ↑".equals(orden)) {
+            sql.append("o.precio ASC");
+        } else {
+            sql.append("o.destacada DESC, o.precio ASC");
+        }
+
+        try (PreparedStatement ps = Database.getConnection().prepareStatement(sql.toString())) {
+            int index = 1;
+            if (estadoFiltro != null && !"Todos".equals(estadoFiltro)) {
+                ps.setString(index++, estadoFiltro);
+            }
+            if (condicionFiltro != null && !"Todas".equals(condicionFiltro)) {
+                ps.setString(index, condicionFiltro);
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    public List<Oferta> getVisibleOffersByLibro(int libroId, String estadoFiltro, String condicionFiltro, String orden) {
+        List<Oferta> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(SELECT_FULL);
+        List<String> where = new ArrayList<>();
+        where.add("e.estado != 'Vendido'");
+        where.add("o.fk_libro = ?");
+
+        if (estadoFiltro != null && !"Todos".equals(estadoFiltro)) {
+            where.add("e.estado = ?");
+        }
+        if (condicionFiltro != null && !"Todas".equals(condicionFiltro)) {
+            where.add("c.condicion = ?");
+        }
+
+        sql.append("WHERE ").append(String.join(" AND ", where));
+        sql.append(" ORDER BY ");
+        if ("Precio ↓".equals(orden)) {
+            sql.append("o.precio DESC");
+        } else if ("Precio ↑".equals(orden)) {
+            sql.append("o.precio ASC");
+        } else {
+            sql.append("o.destacada DESC, o.precio ASC");
+        }
+
+        try (PreparedStatement ps = Database.getConnection().prepareStatement(sql.toString())) {
+            int index = 1;
+            ps.setInt(index++, libroId);
+            if (estadoFiltro != null && !"Todos".equals(estadoFiltro)) {
+                ps.setString(index++, estadoFiltro);
+            }
+            if (condicionFiltro != null && !"Todas".equals(condicionFiltro)) {
+                ps.setString(index, condicionFiltro);
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
     public int insert(Oferta o) {
         String sql = "INSERT INTO oferta (precio, foto, destacada, fk_libro, fk_usuario, fk_estado, fk_condicion) VALUES (?,?,?,?,?,?,?)";
         try (PreparedStatement ps = Database.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -103,6 +190,23 @@ public class OfertaDAO {
             ps.setInt(1, destacada ? 1 : 0);
             ps.setInt(2, id);
             ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void reservar(int id) {
+        String sql = "SELECT id FROM estado WHERE estado = 'Reservado'";
+        try (PreparedStatement ps = Database.getConnection().prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int estadoId = rs.getInt("id");
+                try (PreparedStatement update = Database.getConnection().prepareStatement("UPDATE oferta SET fk_estado=? WHERE id=?")) {
+                    update.setInt(1, estadoId);
+                    update.setInt(2, id);
+                    update.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

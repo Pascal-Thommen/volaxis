@@ -21,7 +21,7 @@ public class LoginFrame extends JFrame {
         setTitle("Volaxis – Iniciar sesión");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
-        setSize(420, 380);
+        setSize(420, 450);
         setLocationRelativeTo(null);
         buildUI();
     }
@@ -63,11 +63,13 @@ public class LoginFrame extends JFrame {
         form.add(label("Correo electrónico"), c);
         c.gridy = 1;
         styleField(emailField);
+        addPlaceholder(emailField, "tu@email.com");
         form.add(emailField, c);
         c.gridy = 2;
         form.add(label("Contraseña"), c);
         c.gridy = 3;
         styleField(passField);
+        addPlaceholder(passField, "Tu contraseña");
         form.add(passField, c);
 
         c.gridy = 4;
@@ -124,6 +126,28 @@ public class LoginFrame extends JFrame {
         ));
     }
 
+    private void addPlaceholder(JTextField field, String placeholder) {
+        Color placeholderColor = new Color(170, 170, 190);
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setText(placeholder);
+                    field.setForeground(placeholderColor);
+                }
+            }
+        });
+        field.setText(placeholder);
+        field.setForeground(placeholderColor);
+    }
+
     private JButton primaryButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -131,9 +155,11 @@ public class LoginFrame extends JFrame {
         b.setForeground(Color.WHITE);
         b.setFocusPainted(false);
         b.setBorderPainted(false);
+        b.setContentAreaFilled(true);
         b.setOpaque(true);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setPreferredSize(new Dimension(0, 38));
+        b.setPreferredSize(new Dimension(0, 46));
+        b.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         return b;
     }
 

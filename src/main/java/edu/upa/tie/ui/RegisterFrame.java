@@ -20,7 +20,7 @@ public class RegisterFrame extends JDialog {
     public RegisterFrame(Frame parent) {
         super(parent, "Volaxis – Registrarse", true);
         setResizable(false);
-        setSize(440, 420);
+        setSize(440, 540);
         setLocationRelativeTo(parent);
         buildUI();
     }
@@ -47,6 +47,7 @@ public class RegisterFrame extends JDialog {
         c.gridx = 0;
 
         String[] labels = {"Nombre completo", "Correo electrónico", "Contraseña", "WhatsApp (ej: 595981000000)"};
+        String[] placeholders = {"Juan Pérez", "tu@email.com", "Tu contraseña", "5959810000000"};
         JTextField[] fields = {nombreField, emailField, passField, whatsappField};
 
         for (int i = 0; i < labels.length; i++) {
@@ -54,6 +55,7 @@ public class RegisterFrame extends JDialog {
             form.add(label(labels[i]), c);
             c.gridy = i * 2 + 1;
             styleField(fields[i]);
+            addPlaceholder(fields[i], placeholders[i]);
             form.add(fields[i], c);
         }
 
@@ -114,6 +116,28 @@ public class RegisterFrame extends JDialog {
         ));
     }
 
+    private void addPlaceholder(JTextField field, String placeholder) {
+        Color placeholderColor = new Color(170, 170, 190);
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setText(placeholder);
+                    field.setForeground(placeholderColor);
+                }
+            }
+        });
+        field.setText(placeholder);
+        field.setForeground(placeholderColor);
+    }
+
     private JButton primaryButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -121,9 +145,11 @@ public class RegisterFrame extends JDialog {
         b.setForeground(Color.WHITE);
         b.setFocusPainted(false);
         b.setBorderPainted(false);
+        b.setContentAreaFilled(true);
         b.setOpaque(true);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setPreferredSize(new Dimension(0, 38));
+        b.setPreferredSize(new Dimension(0, 46));
+        b.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         return b;
     }
 
